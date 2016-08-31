@@ -1,0 +1,265 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Floodlight OpenFlow Controller - IoT Sensor DB</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- MetisMenu CSS -->
+    <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS -->
+    <link href="../bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.css"
+          rel="stylesheet">
+
+    <!-- DataTables Responsive CSS -->
+    <link href="../bower_components/datatables-responsive/css/dataTables.responsive.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    
+    <!-- Filip: anim -->
+    <link href="../bower_components/pnotify/css/pnotify.css" rel="stylesheet"/>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+<div id="wrapper">
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html" id="home-button-title">Floodlight OpenFlow Controller </a>
+        </div>
+        <!-- /.navbar-header -->
+        <!-- /.navbar-top-links -->
+        <div class="navbar-default sidebar" role="navigation">
+            <div class="sidebar-nav navbar-collapse">
+                <nav id="navMenu"></nav>
+            </div>
+            <!-- /.sidebar-collapse -->
+        </div>
+        <!-- /.navbar-static-side -->
+    </nav>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h3 class="page-header">IoT Sensor DB</h3>
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-primary">
+                    <div class="panel-heading">
+                        Table
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                    
+                    <div class="form-group">                   
+                    
+	                     </div>
+                
+                       
+                        <div id="tableIoT">
+                        </div>
+                        <!-- /.table-responsive -->
+
+                         <center><button type="button" class="btn btn-primary" id="disDupBtn">
+                         Disable duplicates
+                         </button></center>
+                        
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+                
+                <p id="test"/> Test </p>
+
+
+            </div>
+            <!-- /.col-lg-12 -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /#page-wrapper -->
+    <div id="login-modal-include"></div>
+
+</div>
+<!-- /#wrapper -->
+
+<!-- jQuery -->
+<script src="../bower_components/jquery/dist/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<!-- Metis Menu Plugin JavaScript -->
+<script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
+
+<!-- DataTables JavaScript -->
+<script src="../bower_components/datatables/media/js/jquery.dataTables.min.js"></script>
+<script src="../bower_components/datatables-plugins/integration/bootstrap/3/dataTables.bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../dist/js/sb-admin-2.js"></script>
+<script src="../js/jquery.cookie.js"></script>
+<!-- Page-Level Demo Scripts - Tables - Use for reference -->
+<script src="../js/querystringparser.js"></script>
+
+<!-- PNotify -->
+<script src="../bower_components/pnotify/pnotify.buttons.js"></script>
+<script src="../bower_components/pnotify/pnotify.core.js"></script>
+<script src="../bower_components/pnotify/pnotify.nonblock.js"></script>
+
+<!-- Custom scripts to load in HTML -->
+<script src="../js/navbar.js"></script>
+<script>
+    $(function(){
+        $("#login-modal-include").load("loginmodal.html");
+    });
+</script>
+
+<script>
+
+	var sId = getQueryParameterByName("id"); //00:00:00:00:00:00:00:01
+	//if(sId == 0) sId = 00:00:00:00:00:00:00:01; 
+    
+    $.ajax({    	
+        url: "http://" + ipaddress + ":" + restport + "/wm/core/switch/all/flow/json",
+        success: function (dat) {
+            console.log(dat);
+            document.getElementById("test").innerHTML = "OK";
+         
+			var dset = Array();		
+			var gw = 0;
+			
+			var flowString = "-";				
+			var html = " <table class='table table-bordered table-striped table-hover responsive-utilities'>" +
+                        "<thead><tr> <th>Sensor ID </th>  <th>GW Detected</th><th>Packet Count</th></tr></thead><tbody>";
+			
+			for (var obj in dat){
+            	//flowString += dat[obj].id + " is " + dat[obj].class + "<br/>";        
+            	var gw_id = "";     	
+            	for (propName in obj) {
+                    if (obj.hasOwnProperty(propName)) {
+                        gw_id += obj[propName];
+                    }
+                }            	
+            	var gw_set = Array(); 
+            	var j = 0; 
+            	for (var i = 0; i < dat[obj]["flows"].length; i++) {            		
+            		if(dat[obj]["flows"][i]["match"].hasOwnProperty('ipv6_label')){ 
+            			gw_set[j++] = [
+            			dat[obj]["flows"][i]["match"]["ipv6_label"],
+            			gw_id,
+            			dat[obj]["flows"][i]["packet_count"]
+            			];	
+            			html += "<tr><td>" + dat[obj]["flows"][i]["match"]["ipv6_label"]
+            			 + "</td><td>" + gw_id + "</td>"
+            			 + "</td><td>" + dat[obj]["flows"][i]["packet_count"] + "</td></tr>";	            		
+            		} 
+            		//flowString += "flow: " + i;  
+            	}
+            	if(gw_set.length > 0){
+            		dset[gw++] = gw_set;             		
+            	}            	
+            }
+           
+            document.getElementById("test").innerHTML = flowString;            
+            //document.getElementById("test").innerHTML = dset[]; //dataf["data"][0]["sensor_id"]; 
+            
+            //New IoT Table
+            html += "  </tbody></table>";
+            $("#tableIoT").html(html);
+            
+            /*$('#tableHosts').DataTable({
+                data: dset[0],
+                columns: [                	
+                	{title: 'Sensor ID'},
+                	{title: 'GW Detected'},
+                	{title: 'Packet Count'}                  
+                ]
+            }); */     
+        },
+        error: function (xhr, status, error) {
+            alert("Hata==" + xhr.responseText);            
+            return "";
+        }
+    });
+
+
+</script>
+
+<script>
+
+	$("#disDupBtn").click(function () {	
+            disDup();    
+            /*new PNotify({
+                title: 'Enter A Value!',
+                text : 'Please enter a valid mask!',
+                type : 'warning',
+                hide : false
+            });*/
+       
+    });
+    
+    function disDup() {
+        $.ajax({
+            type    : "GET",
+            dataType: 'json',
+            url     : "http://" + ipaddress + ":" + restport + "/wm/iot/disableDuplicates",            
+            success : function (data) {
+				if (data["result"] == 1){
+					var res = data["text"]; 
+	                new PNotify({
+	                    title: 'Duplicated disabled',
+	                    text : res,
+	                    type : 'success',
+	                    hide : true
+	                });
+                }
+
+               // $("#roleModalCloseButton2").click();
+            },
+            error   : function (jqXHR, textStatus, errorThrown) {
+                alert('Error: ' + " " + jqXHR.responseText + " \n Status: " + textStatus + " \n Error Thrown: " + errorThrown);
+            }
+        });
+    }
+    
+
+</script>
+
+</body>
+
+</html>
